@@ -15,11 +15,31 @@ class Task(BaseModel):
         False,
         title='Shows whether the task was completed',
     )
+    userID: Optional[str] = Field(
+        'no user',
+        title = 'user ID',
+        max_length=16,
+    )
 
     class Config:
         schema_extra = {
             'example': {
                 'description': 'Buy baby diapers',
                 'completed': False,
+                'userID': 'numeroesquisito'
+            }
+        }
+
+class User(BaseModel):
+    name: Optional[str] = Field(
+        'unnamed',
+        title='User Name',
+        max_length=64,
+    )
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'name': 'José',
             }
         }

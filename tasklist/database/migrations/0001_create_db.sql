@@ -3,4 +3,5 @@ CREATE TABLE tasks (
     uuid BINARY(16) PRIMARY KEY,
     description NVARCHAR(1024),
     completed BOOLEAN
+    FOREIGN KEY (userID) REFERENCES User(userID)
 );

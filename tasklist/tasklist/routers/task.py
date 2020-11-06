@@ -6,7 +6,7 @@ from typing import Dict
 from fastapi import APIRouter, HTTPException, Depends
 
 from ..database import DBSession, get_db
-from ..models import Task
+from ..models import Task, User
 
 router = APIRouter()
 
@@ -110,3 +110,7 @@ async def remove_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
 )
 async def remove_all_tasks(db: DBSession = Depends(get_db)):
     db.remove_all_tasks()
+
+
+
+

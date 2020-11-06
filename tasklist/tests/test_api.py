@@ -2,8 +2,13 @@
 import os.path
 
 from fastapi.testclient import TestClient
-
+import sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
 from utils import utils
+
+
 
 from tasklist.main import app
 
@@ -215,3 +220,7 @@ def test_delete_all_tasks():
     response = client.get('/task')
     assert response.status_code == 200
     assert response.json() == {}
+
+
+
+

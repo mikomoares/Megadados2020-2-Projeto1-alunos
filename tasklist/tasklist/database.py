@@ -10,8 +10,7 @@ from fastapi import Depends
 
 from utils.utils import get_config_filename, get_app_secrets_filename
 
-from .models import Task
-
+from .models import Task, User 
 
 class DBSession:
     def __init__(self, connection: conn.MySQLConnection):
@@ -44,7 +43,7 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'INSERT INTO tasks VALUES (UUID_TO_BIN(%s), %s, %s)',
-                (str(uuid_), item.description, item.completed),
+                (str(uuid_), item.description, item.completed, item.userID),
             )
         self.connection.commit()
 
@@ -74,10 +73,10 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 '''
-                UPDATE tasks SET description=%s, completed=%s
+                UPDATE tasks SET description=%s, completed=%s, userID=%s
                 WHERE uuid=UUID_TO_BIN(%s)
                 ''',
-                (item.description, item.completed, str(uuid_)),
+                (item.description, item.completed, str(item.userID), str(uuid_)),
             )
         self.connection.commit()
 
@@ -111,6 +110,49 @@ class DBSession:
             found = bool(results[0])
 
         return found
+
+    def create_user(self, user: User):
+        uuid_ = uuid.uuid4()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'INSERT INTO users VALUES(UUID_TO_BIN(%s), %s)',
+                (str(uuid_), user.name),
+            )
+        self.connection.commit()
+        return uuid_
+
+
+    def remove_user(self, uuid_):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'DELETE FROM users WHERE userID=UUID_TO_BIN(%s)',
+                (str(uuid_), ),
+            )
+        self.connection.commit()
+
+
+    def update_user(self, uuid_, name: str):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                ' UPDATE users SET name=%s WHERE userID=UUID_TO_BIN(%s)',
+                (name, str(uuid_)),
+            )
+        self.connection.commit()
+    
+
+    def read_user(self, uuid_: uuid.UUID):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                '''
+                SELECT userID, name
+                FROM users
+                WHERE uuid = UUID_TO_BIN(%s)
+                ''',
+                (str(uuid_), ),
+            )
+            result = cursor.fetchone()
+
+        return User(userID=result[0], name=str(result[1]))
 
 
 @lru_cache
