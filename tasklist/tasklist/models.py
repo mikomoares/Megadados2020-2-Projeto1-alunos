@@ -18,7 +18,7 @@ class Task(BaseModel):
     userID: Optional[str] = Field(
         'no user',
         title = 'user ID',
-        max_length=16,
+        max_length=36,
     )
 
     class Config:

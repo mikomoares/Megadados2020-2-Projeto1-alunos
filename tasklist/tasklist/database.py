@@ -131,11 +131,11 @@ class DBSession:
         self.connection.commit()
 
 
-    def update_user(self, uuid_, name: str):
+    def update_user(self, uuid_, user: User):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 ' UPDATE users SET name=%s WHERE userID=UUID_TO_BIN(%s)',
-                (name, str(uuid_)),
+                (user.name, str(uuid_)),
             )
         self.connection.commit()
     

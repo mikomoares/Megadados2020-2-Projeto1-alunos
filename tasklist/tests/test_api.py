@@ -46,14 +46,21 @@ def test_read_tasks_with_no_task():
 
 def test_create_and_read_some_tasks():
     setup_database()
+
+    user = {"name":"zé"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
     tasks = [
         {
             "description": "foo",
-            "completed": False
+            "completed": False,
+            "userID": user_uuid
         },
         {
             "description": "bar",
-            "completed": True
+            "completed": True,
+            "userID": user_uuid
         },
         {
             "description": "baz"
@@ -66,23 +73,28 @@ def test_create_and_read_some_tasks():
     expected_responses = [
         {
             'description': 'foo',
-            'completed': False
+            'completed': False,
+            "userID": user_uuid
         },
         {
             'description': 'bar',
-            'completed': True
+            'completed': True,
+            "userID": user_uuid
         },
         {
             'description': 'baz',
-            'completed': False
+            'completed': False,
+            'userID': 'numeroesquisito'
         },
         {
             'description': 'no description',
-            'completed': True
+            'completed': True,
+            'userID': 'numeroesquisito'
         },
         {
             'description': 'no description',
-            'completed': False
+            'completed': False,
+            'userID': 'numeroesquisito'
         },
     ]
 
@@ -126,7 +138,7 @@ def test_substitute_task():
     setup_database()
 
     # Create a task.
-    task = {'description': 'foo', 'completed': False}
+    task = {'description': 'foo', 'completed': False, 'userID': '1'}
     response = client.post('/task', json=task)
     assert response.status_code == 200
     uuid_ = response.json()
@@ -150,7 +162,7 @@ def test_alter_task():
     setup_database()
 
     # Create a task.
-    task = {'description': 'foo', 'completed': False}
+    task = {'description': 'foo', 'completed': False, 'userID': '1'}
     response = client.post('/task', json=task)
     assert response.status_code == 200
     uuid_ = response.json()
@@ -202,7 +214,7 @@ def test_delete_all_tasks():
     setup_database()
 
     # Create a task.
-    task = {'description': 'foo', 'completed': False}
+    task = {'description': 'foo', 'completed': False, 'userID': '1'}
     response = client.post('/task', json=task)
     assert response.status_code == 200
     uuid_ = response.json()
@@ -222,5 +234,59 @@ def test_delete_all_tasks():
     assert response.json() == {}
 
 
+
+def test_read_user_with_no_user():
+    setup_database()
+    response = client.get('/user')
+    assert response.status_code == 200
+    assert response.json() == {}
+
+def update_user():
+    setup_database()
+    user = {"name":"zé"}
+    response_get = client.get('/user', json=user)
+    user_uuid =  response_get.json()
+
+    new_user = {"name":"zinho"}
+
+    response_put = client.patch(f'/user/{user_uuid}', json=new_user)
+
+    response_delete = client.delete(f"/user/{user_uuid}")
+
+    assert response_put.status_code == 200
+    assert response_delete.status_code == 200
+
+def test_create_and_delete_user():
+    setup_database()
+    user = {"name":"zé"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
+    response = client.delete(f"/user/{user_uuid}")
+    assert response.status_code == 200
+
+def test_create_and_read_user():
+    setup_database()
+    user = {"name":"zé"}
+    response1 = client.get('/user', json=user)
+    user_uuid =  response1.json()
+
+    response2 = client.get(f"/user/{user_uuid}")
+
+    assert response1.status_code == 200
+    assert response2.status_code == 200
+
+def test_read_users_with_no_user():
+    setup_database()
+    response = client.get("/user")
+    assert response.status_code == 200
+    assert response.json() == {}
+
+
+def test_read_nonexistant_user():
+    setup_database()
+
+    response = client.get("/user/nao_existe")
+    assert response.status_code == 404
 
 
